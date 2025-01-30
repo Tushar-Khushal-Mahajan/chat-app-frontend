@@ -13,3 +13,16 @@ export const createRoom = async (roomId) => {
   return response.data;
 
 }
+
+
+export const joinRoom = async (roomId) => {
+
+  const response = await httpClient.get(`/api/v1/rooms/${roomId}`, {
+    headers: {
+      "Content-Type": "text/plain",
+    }
+  });
+
+  return response.data;
+
+}

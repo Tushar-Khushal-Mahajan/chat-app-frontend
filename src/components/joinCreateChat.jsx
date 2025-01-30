@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRef } from "react"
 import toast from "react-hot-toast";
-import { createRoom } from "../services/roomService";
+import { createRoom, joinRoom } from "../services/roomService";
 import { useChatContext } from "../context/chatContext";
 import { useNavigate } from "react-router";
 
@@ -37,9 +37,9 @@ function JoinCreateChat() {
 
         setCurrentUser(nameField.current.value);
         setRoomId(roomIdField.current.value);
+        setConnected(true);
 
         // forward to chat page
-        setConnected(true);
         navigate("/chat");
 
       } catch (error) {
@@ -49,10 +49,29 @@ function JoinCreateChat() {
     }
   }
 
-  function joinRoomHandler() {
+  async function joinRoomHandler() {
     if (validateInput(nameField.current.value, roomIdField.current.value)) {
-      console.log("name : " + nameField.current.value)
-      console.log("roomID : " + roomIdField.current.value)
+      console.log("name : " + nameField.current.value);
+      console.log("roomID : " + roomIdField.current.value);
+
+      try {
+
+        let response = await joinRoom(roomIdField.current.value);
+
+        console.log(response);
+        toast.success("Room Join");
+
+        setCurrentUser(nameField.current.value);
+        setRoomId(roomIdField.current.value);
+        setConnected(true);
+
+        // forward to chat page
+        navigate("/chat");
+
+      } catch (error) {
+        toast.error("No room found");
+        console.error(error);
+      }
     }
   }
 
