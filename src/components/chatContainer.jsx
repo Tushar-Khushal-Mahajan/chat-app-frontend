@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import ChatSend from "./chatSend";
 import { useChatContext } from "../context/chatContext";
 import { useNavigate } from "react-router";
+import SockJS from "sockjs-client";
+import { BASE_URL } from "../services/httpClient";
+import { Stomp } from "@stomp/stompjs";
+import toast from "react-hot-toast";
 
 
 const ChatContainer = () => {
@@ -41,6 +45,30 @@ const ChatContainer = () => {
       navigator("/");
     }
   }, [roomId, currentUser, connected]);
+
+
+  // load messages on page load
+  useEffect(() => {
+
+    const websocketConnect = () => {
+      const sock = new SockJS(`${BASE_URL}/chat`);
+
+      const client = Stomp.over(sock)
+
+      client.connect({}, () => {
+        setStompClient(client);
+        toast.success("Connected");
+        client.subscribe(`/topic/room/${roomId}`, (message) => {
+          console.log(message);
+          const newMessage = JSON.parse(message);
+          setMessage((prevMessages) => [...prevMessages, newMessage]);
+        });
+      });
+    }
+
+    websocketConnect();
+
+  }, [roomId]);
 
   return <>
     <div className="min-w-screen flex justify-center overflow-y-scroll flex-1">
