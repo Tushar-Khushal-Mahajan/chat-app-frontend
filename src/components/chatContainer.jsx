@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatSend from "./chatSend";
+import { useChatContext } from "../context/chatContext";
+import { useNavigate } from "react-router";
 
 
 const ChatContainer = () => {
@@ -30,9 +32,15 @@ const ChatContainer = () => {
   const inputRef = (null);
   const chatBoxRef = (null);
   const [stompClient, setStompClient] = useState(null);
-  const [roomId, setRoomId] = useState("");
-  const [user, setUser] = useState("Tushar");
+  const { roomId, currentUser, connected } = useChatContext();
 
+  const navigator = useNavigate();
+
+  useEffect(() => {
+    if (!connected) {
+      navigator("/");
+    }
+  }, [roomId, currentUser, connected]);
 
   return <>
     <div className="min-w-screen flex justify-center overflow-y-scroll flex-1">
@@ -41,7 +49,7 @@ const ChatContainer = () => {
           <div key={index} className="w-full">
             <section
               className={`p-2 pb-3 
-            ${(message.sender === user) ? 'bg-[#D9FDD3] text-black float-right' : 'bg-white text-black'} 
+            ${(message.sender === currentUser) ? 'bg-[#D9FDD3] text-black float-right' : 'bg-white text-black'} 
             min-w-[8rem] max-w-5/6 md:max-w-4/6 rounded-bl-2xl rounded-br-2xl rounded-tl-2xl relative inline-block`}
             >
               <small className="text-xs text-orange-900">{message.sender}</small><br />
