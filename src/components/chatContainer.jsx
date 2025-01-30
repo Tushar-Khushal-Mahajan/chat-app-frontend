@@ -10,28 +10,7 @@ import toast from "react-hot-toast";
 
 const ChatContainer = () => {
 
-  const [messages, setMessage] = useState([
-    {
-      content: "hii",
-      sender: "Tushar"
-    },
-    {
-      content: "Hello",
-      sender: "Tushar"
-    },
-    {
-      content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perspiciatis ipsa inventore quibusdam illo fuga ullam laboriosam nemo, aut praesentium voluptatibus, hic recusandae et earum voluptate nihil, consequuntur eveniet quidem mollitia!",
-      sender: "Tushar"
-    },
-    {
-      content: "hii",
-      sender: "Bhuvan"
-    },
-    {
-      content: "h",
-      sender: "Tushar"
-    }
-  ]);
+  const [messages, setMessage] = useState([]);
   const [input, setInput] = useState("");
   const inputRef = (null);
   const chatBoxRef = (null);
@@ -60,8 +39,11 @@ const ChatContainer = () => {
         toast.success("Connected");
         client.subscribe(`/topic/room/${roomId}`, (message) => {
           console.log(message);
-          const newMessage = JSON.parse(message);
+          const newMessage = JSON.parse(message.body);
+          console.error("Messages :- ", messages);
           setMessage((prevMessages) => [...prevMessages, newMessage]);
+
+          console.error("Messages :- ", messages);
         });
       });
     }
@@ -69,6 +51,18 @@ const ChatContainer = () => {
     websocketConnect();
 
   }, [roomId]);
+
+  function chatSend(message) {
+    if (connected && stompClient && message.trim() != "") {
+      const messageObj = {
+        content: message.trim(),
+        sender: currentUser,
+        roomId: roomId
+      }
+
+      stompClient.send(`/app/sendMessage/${roomId}`, {}, JSON.stringify(messageObj));
+    }
+  }
 
   return <>
     <div className="min-w-screen flex justify-center overflow-y-scroll flex-1">
@@ -88,6 +82,9 @@ const ChatContainer = () => {
         ))}
       </div>
     </div>
+
+
+    <ChatSend callBack={chatSend} />
   </>;
 }
 

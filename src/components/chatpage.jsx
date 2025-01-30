@@ -7,7 +7,6 @@ const ChatPage = () => {
     <div className="min-h-svh max-h-[100vh] overflow-hidden flex flex-col justify-between bg-gray-900">
       <ChatHeader />
       <ChatContainer />
-      <ChatSend />
     </div>
   </>
 }

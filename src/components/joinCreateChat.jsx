@@ -58,7 +58,7 @@ function JoinCreateChat() {
 
         let response = await joinRoom(roomIdField.current.value);
 
-        console.log(response);
+        console.log("Room details :", response);
         toast.success("Room Join");
 
         setCurrentUser(nameField.current.value);
