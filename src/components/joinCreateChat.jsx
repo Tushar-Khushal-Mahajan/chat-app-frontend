@@ -4,12 +4,17 @@ import { useState } from "react";
 import { useRef } from "react"
 import toast from "react-hot-toast";
 import { createRoom } from "../services/roomService";
+import { useChatContext } from "../context/chatContext";
+import { useNavigate } from "react-router";
 
 
 function JoinCreateChat() {
 
-  const name = useRef("");
-  const roomId = useRef("");
+  const nameField = useRef("");
+  const roomIdField = useRef("");
+
+  const { roomId, setRoomId, currentUser, setCurrentUser, connected, setConnected } = useChatContext();
+  const navigate = useNavigate();
 
   function validateInput(name, roomId) {
     if (name.trim() == "" || roomId.trim() == "") {
@@ -20,16 +25,22 @@ function JoinCreateChat() {
     }
   }
 
-
   async function createRoomHandler() {
-    if (validateInput(name.current.value, roomId.current.value)) {
+    if (validateInput(nameField.current.value, roomIdField.current.value)) {
 
       try {
-        let response = await createRoom(roomId.current.value);
+        let response = await createRoom(roomIdField.current.value);
 
         console.log(response);
 
         toast.success("Room created successfully..");
+
+        setCurrentUser(nameField.current.value);
+        setRoomId(roomIdField.current.value);
+
+        // forward to chat page
+        setConnected(true);
+        navigate("/chat");
 
       } catch (error) {
         toast.error("Room already exists");
@@ -39,9 +50,9 @@ function JoinCreateChat() {
   }
 
   function joinRoomHandler() {
-    if (validateInput(name.current.value, roomId.current.value)) {
-      console.log("name : " + name.current.value)
-      console.log("roomID : " + roomId.current.value)
+    if (validateInput(nameField.current.value, roomIdField.current.value)) {
+      console.log("name : " + nameField.current.value)
+      console.log("roomID : " + roomIdField.current.value)
     }
   }
 
@@ -51,12 +62,12 @@ function JoinCreateChat() {
 
       <div className='text-lg'>
         <label htmlFor="NAME" className='block'>Your Name</label>
-        <input type="text" name="name" ref={name} id="NAME" placeholder='Enter your name' className='mt-1 border-2 border-gray-600 rounded-full px-2 w-full bg-gray-800' />
+        <input type="text" name="name" ref={nameField} id="NAME" placeholder='Enter your name' className='mt-1 border-2 border-gray-600 rounded-full px-2 w-full bg-gray-800' />
       </div>
 
       <div className='text-lg'>
         <label htmlFor="ROOOM_ID" className='block'>Room Id</label>
-        <input type="text" name="rommId" ref={roomId} id="ROOOM_ID" placeholder='Enter Room ID' className='mt-1 border-2 border-gray-600 rounded-full px-2 w-full bg-gray-800' />
+        <input type="text" name="rommId" ref={roomIdField} id="ROOOM_ID" placeholder='Enter Room ID' className='mt-1 border-2 border-gray-600 rounded-full px-2 w-full bg-gray-800' />
       </div>
 
       <div className='mt-1 flex justify-end text-gray-950 font-semibold'>
