@@ -21,12 +21,20 @@ function JoinCreateChat() {
   }
 
 
-  function createRoomHandler() {
+  async function createRoomHandler() {
     if (validateInput(name.current.value, roomId.current.value)) {
 
-      // console.log(details);
+      try {
+        let response = await createRoom(roomId.current.value);
 
-      createRoom(roomId.current.value);
+        console.log(response);
+
+        toast.success("Room created successfully..");
+
+      } catch (error) {
+        toast.error("Room already exists");
+        console.error(error);
+      }
     }
   }
 
