@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatSend from "./chatSend";
 import { useChatContext } from "../context/chatContext";
 import { useNavigate } from "react-router";
@@ -6,16 +6,20 @@ import SockJS from "sockjs-client";
 import { BASE_URL } from "../services/httpClient";
 import { Stomp } from "@stomp/stompjs";
 import toast from "react-hot-toast";
+import { getMessagesByRoomId } from "../services/roomService";
 
 
 const ChatContainer = () => {
 
   const [messages, setMessage] = useState([]);
-  const [input, setInput] = useState("");
-  const inputRef = (null);
-  const chatBoxRef = (null);
+  // const [input, setInput] = useState("");
+  // const inputRef = (null);
+  // const chatBoxRef = (null);
   const [stompClient, setStompClient] = useState(null);
   const { roomId, currentUser, connected } = useChatContext();
+
+  // Create a ref for the last message element
+  const lastMessageRef = useRef(null);
 
   const navigator = useNavigate();
 
@@ -29,6 +33,15 @@ const ChatContainer = () => {
   // load messages on page load
   useEffect(() => {
 
+
+    const loadOldMessages = async () => {
+      let oldMessages = await getMessagesByRoomId(roomId);
+
+      // console.log("old messages : ", oldMessages.data);
+
+      setMessage([...oldMessages.data]);
+    }
+
     const websocketConnect = () => {
       const sock = new SockJS(`${BASE_URL}/chat`);
 
@@ -38,19 +51,24 @@ const ChatContainer = () => {
         setStompClient(client);
         toast.success("Connected");
         client.subscribe(`/topic/room/${roomId}`, (message) => {
-          console.log(message);
+          // console.log(message);
           const newMessage = JSON.parse(message.body);
-          console.error("Messages :- ", messages);
+          // console.error("Messages :- ", messages);
           setMessage((prevMessages) => [...prevMessages, newMessage]);
-
-          console.error("Messages :- ", messages);
+          // console.error("Messages :- ", messages);
         });
       });
     }
-
+    loadOldMessages();
     websocketConnect();
 
   }, [roomId]);
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   function chatSend(message) {
     if (connected && stompClient && message.trim() != "") {
@@ -63,6 +81,7 @@ const ChatContainer = () => {
       stompClient.send(`/app/sendMessage/${roomId}`, {}, JSON.stringify(messageObj));
     }
   }
+
 
   return <>
     <div className="min-w-screen flex justify-center overflow-y-scroll flex-1">
@@ -80,6 +99,9 @@ const ChatContainer = () => {
             </section>
           </div>
         ))}
+
+        {/* The ref is added to the last message element */}
+        <div ref={lastMessageRef}></div>
       </div>
     </div>
 

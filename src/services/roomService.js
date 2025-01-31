@@ -26,3 +26,13 @@ export const joinRoom = async (roomId) => {
   return response.data;
 
 }
+
+export const getMessagesByRoomId = async (roomId) => {
+  const response = httpClient.get(`/api/v1/rooms/${roomId}/messages`, {
+    headers: {
+      "Content-Type": "text/plain",
+    }
+  });
+
+  return response;
+}
